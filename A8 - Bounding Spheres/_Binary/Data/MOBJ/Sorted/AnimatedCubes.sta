@@ -1,0 +1,52 @@
+States:
+#Name (Sequence Transition Repeat)
+	#Regular states
+StandUp ( 1 0 1 )	//0
+Down ( 2 0 1 )		//1
+Arc ( 3 0 1 )		//2
+CArc ( 4 0 1 )		//3
+Fall ( 5 0 1 )		//4
+Twist ( 6 0 1 )		//5
+
+	#Transition states
+StandUpToDown ( 7 1 0 )		//6
+DownToStandUp ( 8 1 0 )		//7
+
+StandUpToArc ( 9 1 0 )		//8
+ArcToStandUp ( 10 1 0 )		//9
+
+StandUpToCArc ( 11 1 0 )	//10
+CArcToStandUp ( 12 1 0 )	//11
+
+StandUpToFall ( 13 1 0 )	//12
+FallToStandUp ( 14 1 0 )	//13
+
+StandUpToTwist ( 15 1 0 )	//14
+TwistToStandUp ( 16 1 0 )	//15
+
+Exits:
+#name -> name
+StandUp -> StandUpToDown
+StandUpToDown -> Down
+Down -> DownToStandUp
+DownToStandUp -> StandUp
+
+StandUp -> StandUpToArc
+StandUpToArc -> Arc
+Arc -> ArcToStandUp
+ArcToStandUp -> StandUp
+
+StandUp -> StandUpToCArc
+StandUpToCArc -> CArc
+CArc -> CArcToStandUp
+CArcToStandUp -> StandUp
+
+StandUp -> StandUpToFall
+StandUpToFall -> Fall
+Fall -> FallToStandUp
+FallToStandUp -> StandUp
+
+StandUp -> StandUpToTwist
+StandUpToTwist -> Twist
+Twist -> TwistToStandUp
+TwistToStandUp -> StandUp
