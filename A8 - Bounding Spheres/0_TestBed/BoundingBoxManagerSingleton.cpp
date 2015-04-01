@@ -118,15 +118,20 @@ void BoundingBoxManagerSingleton::AddBoxToRenderList(String a_sInstanceName)
 
 void BoundingBoxManagerSingleton::CalculateCollision(void)
 {
-	//Create a placeholder for all center points
+	//Create a placeholders
 	std::vector<vector3> lCentroid;
-	//for all spheres...
+	std::vector<vector3> lMins;
+	std::vector<vector3> lMaxs;
+	//for all boxes...
 	for(int nBox = 0; nBox < m_nBoxs; nBox++)
 	{
 		//Make all the spheres white
 		m_lColor[nBox] = vector3(1.0f);
 		//Place all the centroids of spheres in global space
 		lCentroid.push_back(static_cast<vector3>(m_lMatrix[nBox] * vector4(m_lBox[nBox]->GetCentroid(), 1.0f)));
+		lMins.push_back(static_cast<vector3>(m_lMatrix[nBox] * vector4(m_lBox[nBox]->GetMin(), 1.0f)));
+		lMaxs.push_back(static_cast<vector3>(m_lMatrix[nBox] * vector4(m_lBox[nBox]->GetMax(), 1.0f)));
+
 	}
 
 	for(int i = 0; i < m_nBoxs; i++)
@@ -137,62 +142,30 @@ void BoundingBoxManagerSingleton::CalculateCollision(void)
 			{
 				BoundingBoxClass* b1 = m_lBox[i];
 				BoundingBoxClass* b2 = m_lBox[j];
-				vector3 b1Centroid = b1->GetCentroid();
-				vector3 b2Centroid = b2->GetCentroid();
+				vector3 b1Centroid = lCentroid[i];
+				vector3 b2Centroid = lCentroid[j];
+				vector3 b1Min = lMins[i];
+				vector3 b1Max = lMaxs[i];
+				vector3 b2Min = lMins[j];
+				vector3 b2Max = lMaxs[j];
 				float CentDiffX = abs(b1Centroid.x - b2Centroid.x);
-				float CentDiffY = abs(b1Centroid.y - b1Centroid.y);
+				float CentDiffY = abs(b1Centroid.y - b2Centroid.y);
 				float CentDiffZ = abs(b1Centroid.z - b2Centroid.z);
-				float b1HalfWidth = (b1->GetMax().x - b1->GetMin().x) / 2.0f;
-				float b2HalfWidth = (b2->GetMax().x - b2->GetMin().x) / 2.0f;
-				float b1HalfHeight = (b1->GetMax().y - b1->GetMin().y) / 2.0f;
-				float b2HalfHeight = (b2->GetMax().y - b2->GetMin().y) / 2.0f;
-				float b1HalfDepth = (b1->GetMax().z - b1->GetMin().z) / 2.0f;
-				float b2HalfDepth = (b2->GetMax().z - b2->GetMin().z) / 2.0f;
-				/*if ( CentDiffX < (b1HalfWidth + b2HalfWidth) )
-					m_lColor[i] = m_lColor[j] = MERED;*/
-
-				/*if(b1->GetMax().x > b2->GetMin().x && 
-					b1->GetMin().x < b2->GetMax().x &&
-					b1->GetMax().y > b2->GetMin().y &&
-					b1->GetMin().y < b2->GetMax().y &&
-					b1->GetMax().z > b2->GetMin().z &&
-					b1->GetMin().z < b2->GetMax().z)
-					m_lColor[i] = m_lColor[j] = MERED;
-*/
-				//If the distance between the center of both Boxs is less than the sum of their radius there is a collision
-				if(glm::distance(lCentroid[i], lCentroid[j]) < (b1HalfWidth + b2HalfWidth))
-					m_lColor[i] = m_lColor[j] = MERED; //We make the Boxs red
-				if(glm::distance(lCentroid[i], lCentroid[j]) < (b1HalfHeight + b2HalfHeight))
-					m_lColor[i] = m_lColor[j] = MERED; //We make the Boxs red
-				if(glm::distance(lCentroid[i], lCentroid[j]) < (b1HalfDepth + b2HalfDepth))
+				float b1HalfWidth = (b1Max.x - b1Min.x) / 2.0f;
+				float b2HalfWidth = (b2Max.x - b2Min.x) / 2.0f;
+				float b1HalfHeight = (b1Max.y - b1Min.y) / 2.0f;
+				float b2HalfHeight = (b2Max.y - b2Min.y) / 2.0f;
+				float b1HalfDepth = (b1Max.z - b1Min.z) / 2.0f;
+				float b2HalfDepth = (b2Max.z - b2Min.z) / 2.0f;
+				
+				//If the distance between the center of both Boxess is less than the 
+				//sum of their Half-Dimensions there is a collision
+				if(CentDiffX < (b1HalfWidth + b2HalfWidth) &&
+				   CentDiffY < (b1HalfHeight + b2HalfHeight) &&
+				   CentDiffZ < (b1HalfDepth + b2HalfDepth))
 					m_lColor[i] = m_lColor[j] = MERED; //We make the Boxs red
 			}
 		}
 	}
-
-	////Create a placeholder for all center points
-	//std::vector<vector3> lCentroid;
-	////for all Boxs...
-	//for(int nBox = 0; nBox < m_nBoxs; nBox++)
-	//{
-	//	//Make all the Boxs white
-	//	m_lColor[nBox] = vector3(1.0f);
-	//	//Place all the centroids of Boxs in global space
-	//	lCentroid.push_back(static_cast<vector3>(m_lMatrix[nBox] * vector4(m_lBox[nBox]->GetCentroid(), 1.0f)));
-	//}
-
-	////now the actual check for all Boxs among all Boxs (so... one by one), this is not the most optimal way, there is a more clever one
-	//for(int i = 0; i < m_nBoxs; i++)
-	//{
-	//	for(int j = 0; j < m_nBoxs; j++)
-	//	{
-	//		if(i != j)
-	//		{
-	//			//If the distance between the center of both Boxs is less than the sum of their radius there is a collision
-	//			//if(glm::distance(lCentroid[i], lCentroid[j]) < (m_lBox[i]->GetRadius() + m_lBox[j]->GetRadius()))
-	//			//	m_lColor[i] = m_lColor[j] = MERED; //We make the Boxs red
-	//		}
-	//	}
-	//}
 	
 }
