@@ -163,6 +163,7 @@ void ApplicationClass::Update (void)
 	m_pBBMngr->SetBoundingBoxSpace(m4Cow, "Cow");
 	m_pBBMngr->SetBoundingBoxSpace(m4Pig, "Pig");
 	m_pBBMngr->SetBoundingBoxSpace(m4Zombie, "Zombie");
+	m_pBBMngr->SetBoundingBoxVisibility(false, "Pig");  //Example of setting bounding box visibility
 	m_pBBMngr->CalculateCollision();
 	m_pBBMngr->AddBoxToRenderList();
 #pragma endregion

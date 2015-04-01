@@ -36,6 +36,8 @@ public:
 	*/
 	void SetBoundingBoxSpace(matrix4 a_mModelToWorld, String a_sInstanceName);
 
+	void SetBoundingBoxVisibility(bool visible, String a_sInstanceName);
+
 	/*
 	IdentifyBox
 		Returns the index in which the specified Box is stored in the list

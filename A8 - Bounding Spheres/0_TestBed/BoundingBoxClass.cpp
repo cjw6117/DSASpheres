@@ -3,6 +3,7 @@
 void BoundingBoxClass::Init(void)
 {
 	m_bInitialized = false;
+	m_bIsVisible = true;
 	min = vector3(0.0f);
 	max= vector3(0.0f);
 	m_v3Centroid = vector3(0.0f);
@@ -107,4 +108,24 @@ vector3 BoundingBoxClass::GetMin()
 vector3 BoundingBoxClass::GetMax()
 {
 	return max;
+}
+
+vector3 BoundingBoxClass::GetColor(void)
+{
+	return color;
+}
+
+void BoundingBoxClass::SetColor(vector3 color)
+{
+	this->color = color;
+}
+
+bool BoundingBoxClass::GetVisible(void)
+{
+	return m_bIsVisible;
+}
+
+void BoundingBoxClass::SetVisible(bool visible)
+{
+	m_bIsVisible = visible;
 }

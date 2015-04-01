@@ -58,15 +58,16 @@ void BoundingBoxManagerSingleton::GenerateBoundingBox(String a_sInstanceName)
 		if(IdentifyBox(a_sInstanceName) == -1)
 		{
 			//Create a new bounding Box
-			BoundingBoxClass* pBS = new BoundingBoxClass();
+			BoundingBoxClass* pBB = new BoundingBoxClass();
+			pBB->SetColor(vector3(MEWHITE));
 			//construct its information out of the instance name
-			pBS->GenerateBoundingBox(a_sInstanceName);
+			pBB->GenerateBoundingBox(a_sInstanceName);
 			//Push the Box back into the list
-			m_lBox.push_back(pBS);
+			m_lBox.push_back(pBB);
 			//Push a new matrix into the list
 			m_lMatrix.push_back(matrix4(IDENTITY));
 			//Specify the color the Box is going to have
-			m_lColor.push_back(vector3(1.0f));
+			m_lColor.push_back(pBB->GetColor());
 			//Increase the number of Boxs
 			m_nBoxs++;
 		}
@@ -81,6 +82,17 @@ void BoundingBoxManagerSingleton::SetBoundingBoxSpace(matrix4 a_mModelToWorld, S
 	{
 		//Set up the new matrix in the appropriate index
 		m_lMatrix[nBox] = a_mModelToWorld;
+	}
+}
+
+void BoundingBoxManagerSingleton::SetBoundingBoxVisibility(bool visible, String a_sInstanceName)
+{
+	int nBox = IdentifyBox(a_sInstanceName);
+	//If the Box was found
+	if(nBox != -1)
+	{
+		//set box visibility
+		m_lBox[nBox]->SetVisible(visible);
 	}
 }
 
@@ -103,7 +115,8 @@ void BoundingBoxManagerSingleton::AddBoxToRenderList(String a_sInstanceName)
 	{
 		for(int nBox = 0; nBox < m_nBoxs; nBox++)
 		{
-			m_lBox[nBox]->AddBoxToRenderList(m_lMatrix[nBox], m_lColor[nBox], true);
+			if(m_lBox[nBox]->GetVisible())
+				m_lBox[nBox]->AddBoxToRenderList(m_lMatrix[nBox], m_lColor[nBox], true);
 		}
 	}
 	else
@@ -111,7 +124,8 @@ void BoundingBoxManagerSingleton::AddBoxToRenderList(String a_sInstanceName)
 		int nBox = IdentifyBox(a_sInstanceName);
 		if(nBox != -1)
 		{
-			m_lBox[nBox]->AddBoxToRenderList(m_lMatrix[nBox], m_lColor[nBox], true);
+			if(m_lBox[nBox]->GetVisible())
+				m_lBox[nBox]->AddBoxToRenderList(m_lMatrix[nBox], m_lColor[nBox], true);
 		}
 	}
 }

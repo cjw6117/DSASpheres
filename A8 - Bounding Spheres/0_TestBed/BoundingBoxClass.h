@@ -12,9 +12,11 @@ Date: 2015/03
 class BoundingBoxClass
 {
 	bool m_bInitialized; //Has the elements of this object been initialized before?
+	bool m_bIsVisible;
 	vector3 min;
 	vector3 max;
 	vector3 m_v3Centroid;//Center point of the model, the origin in GSpace in which the sphere is going to be located
+	vector3 color;
 	String m_sName;//Name of the BoundingSphere (to relate to the instance)
 
 public:
@@ -50,6 +52,14 @@ public:
 		Returns the maximum values for each dimension
 	*/
 	vector3 GetMax(void);
+
+	vector3 GetColor(void);
+
+	void SetColor(vector3 color);
+
+	bool GetVisible(void);
+
+	void SetVisible(bool visible);
 
 	/*
 	GetName
