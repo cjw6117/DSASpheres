@@ -1,5 +1,5 @@
 /*
-Programmer: Alberto Bobadilla (labigm@gmail.com)
+Programmer: 
 Date: 2015/03
 */
 #ifndef __BOUNDINGSPHEREMANAGERSINGLETON_H_

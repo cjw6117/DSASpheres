@@ -30,10 +30,10 @@
     <ClInclude Include="BoundingSphereManagerSingleton.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BoundingBox.h">
+    <ClInclude Include="BoundingBoxManagerSingleton.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BoundingBoxManagerSingleton.h">
+    <ClInclude Include="BoundingBoxClass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -61,10 +61,10 @@
     <ClCompile Include="BoundingSphereManagerSingleton.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BoundingBox.cpp">
+    <ClCompile Include="BoundingBoxManagerSingleton.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BoundingBoxManagerSingleton.cpp">
+    <ClCompile Include="BoundingBoxClass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
