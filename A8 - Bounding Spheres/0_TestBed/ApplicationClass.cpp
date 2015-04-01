@@ -73,6 +73,7 @@ void ApplicationClass::Release()
 	// Release all the singletons used in the dll
 	ReleaseAllSingletons();
 	m_pBSMngr->ReleaseInstance();
+	m_pBBMngr->ReleaseInstance();
 }
 void ApplicationClass::Init( HINSTANCE hInstance, LPWSTR lpCmdLine, int nCmdShow)
 {

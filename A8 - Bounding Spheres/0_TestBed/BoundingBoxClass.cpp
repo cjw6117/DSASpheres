@@ -98,3 +98,13 @@ void BoundingBoxClass::AddBoxToRenderList(matrix4 a_mModelToWorld, vector3 a_vCo
 	float scaleZ = max.z - min.z;
 	pMeshMngr->AddCubeToQueue(a_mModelToWorld * glm::translate(m_v3Centroid) * glm::scale(vector3( scaleX,scaleY,scaleZ)), a_vColor, MERENDER::WIRE);
 }
+
+vector3 BoundingBoxClass::GetMin()
+{
+	return min;
+}
+
+vector3 BoundingBoxClass::GetMax()
+{
+	return max;
+}

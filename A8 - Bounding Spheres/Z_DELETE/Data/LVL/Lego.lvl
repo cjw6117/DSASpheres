@@ -1,8 +1,0 @@
-Ver: 1
-Ang: Degree
-
-#Instances
-#Instance: Model.Ext -> InternalName (fPosX, fPosY, fPosZ) (fAngX, fAngY, fAngZ) (fSizeX, fSizeY, fSizeZ) (nVisibility, nCollidiable, nState)
-Instance: Sorted\Lego.obj -> Lego	(-3.0, 0.0, 0.0) ( 0.0, 0.0, 0.0) ( 1.0, 1.0, 1.0) (1,1,0)
-Instance: Sorted\Lego.obj -> Lego	(-6.0, 0.0, 0.0) ( 0.0, 0.0, 0.0) ( 1.0, 1.0, 1.0) (1,1,0)
-Instance: Sorted\Lego.obj -> Lego	(-9.0, 0.0, 0.0) ( 0.0, 0.0, 0.0) ( 1.0, 1.0, 1.0) (1,1,0)
