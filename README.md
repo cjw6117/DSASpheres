@@ -4,7 +4,7 @@
 By: Jarrett Way and Matt Guerette
 
 
-Contributions:
+###Contributions:
 
 Jarrett Way - Bounding Box Class
 Matt Guerrette - Bounding Box Manager Class
@@ -14,6 +14,6 @@ Matt Guerrette - Bounding Box Manager Class
 By: Jarrett Way and Matt Guerette
 
 
-Contributions:
+###Contributions:
 
 Jarrett Way and Matt Guerrette - Edited BoundingBoxClass and BoundBoxManagerSingleton to mirror the demo.
