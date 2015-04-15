@@ -1,4 +1,5 @@
 #include "BoundingBoxManagerSingleton.h"
+#include <cfloat>
 
 //  BoundingBoxManagerSingleton
 BoundingBoxManagerSingleton* BoundingBoxManagerSingleton::m_pInstance = nullptr;
@@ -149,6 +150,9 @@ void BoundingBoxManagerSingleton::CalculateCollision(void)
 			vector3 v2Min = m_lBox[j]->GetMinimumAABB();
 			vector3 v2Max = m_lBox[j]->GetMaximumAABB();
 
+
+			
+
 			bool bColliding = true;
 			if(v1Max.x < v2Min.x || v1Min.x > v2Max.x)
 				bColliding = false;
@@ -170,110 +174,123 @@ void BoundingBoxManagerSingleton::CalculateCollision(void)
 
 bool BoundingBoxManagerSingleton::OBB_SAT_Check(int indexA, int indexB)
 {
+
+#pragma region Separating Axis Test
+
 	BoundingBoxClass* A = m_lBox[indexA];
 	BoundingBoxClass* B = m_lBox[indexB];
-	vector4 aMin = m_lMatrix[indexA] * vector4(A->GetMinimumOBB(), 1.0f);
-	vector4 aMax = m_lMatrix[indexA] * vector4(A->GetMaximumOBB(), 1.0f);
-	vector4 aCent = m_lMatrix[indexA] * vector4(A->GetCentroid(), 1.0f);
-
-	vector4 bMin = m_lMatrix[indexB] * vector4(B->GetMinimumOBB(), 1.0f);
-	vector4 bMax = m_lMatrix[indexB] * vector4(B->GetMaximumOBB(), 1.0f);
-	vector4 bCent = m_lMatrix[indexB] * vector4(B->GetCentroid(), 1.0f);
 
 	float radiusA;
 	float radiusB;
 	glm::mat3x3 R, AbsR;
+	
 
-	float aR[3];
-	aR[0] = abs(aMax.x - aCent.x);
-	aR[1] = abs(aMax.y - aCent.y);
-	aR[2] = abs(aMax.z - aCent.z);
+	//Store centroid in each space
+	vector4 aCent = m_lMatrix[indexA] * vector4(A->GetCentroid(), 1.0f);
+	vector4 bCent = m_lMatrix[indexB] * vector4(B->GetCentroid(), 1.0f);
+	vector3 halfA = A->GetOBBSize() / 2.0f;
+	vector3 halfB = B->GetOBBSize() / 2.0f;
 
-	float bR[3];
-	bR[0] = abs(bMax.x - bCent.x);
-	bR[1] = abs(bMax.y - bCent.y);
-	bR[2] = abs(bMax.z - bCent.z);
+	//Store the half widths
+	float aE[3] = { halfA.x, halfA.y, halfA.z };
+	float bE[3] = { halfB.x, halfB.y, halfB.z };
+
+
+	//Calculate the local-axis for each space 
+	vector4 aU[3];
+	aU[0] =  m_lMatrix[indexA] * vector4(1.0f, 0.0f, 0.0f, 0.0f);
+	aU[1] =  m_lMatrix[indexA] * vector4(0.0f, 1.0f, 0.0f, 0.0f);
+	aU[2] =  m_lMatrix[indexA] * vector4(0.0f, 0.0f, 1.0f, 0.0f);
+
+	vector4 bU[3];
+	bU[0] =  m_lMatrix[indexB] * vector4(1.0f, 0.0f, 0.0f, 0.0f);
+	bU[1] =  m_lMatrix[indexB] * vector4(0.0f, 1.0f, 0.0f, 0.0f);
+	bU[2] =  m_lMatrix[indexB] * vector4(0.0f, 0.0f, 1.0f, 0.0f);
+
 
 	//Calculate rotation matrix representing b in a's coordinate frame
-	/*for(int i = 0; i < 3; i++) {
+	for(int i = 0; i < 3; i++) {
 		for(int j = 0; j < 3; j++) {
-			R[i][j] = glm::dot(m_lMatrix[indexA][i], m_lMatrix[indexB][j]);
+			R[i][j] = glm::dot(aU[i], bU[j]);
 		}
-	}*/
-	R = static_cast<glm::mat3x3>(m_lMatrix[indexA] * (m_lMatrix[indexB] / glm::inverse(m_lMatrix[indexB])));
+	}
+	
 
-	//Compute translation vector t
+	//Compute translation vector t in A's space
+	vector4 t = bCent - aCent;
+	t = vector4(
+		glm::dot(t, aU[0]),
+		glm::dot(t, aU[1]),
+		glm::dot(t, aU[2]),
+		0.0f);
 
-	vector3 t = static_cast<vector3>(bCent - aCent);
-	//Brind translation into a's coordinate frame
-	float tx = glm::dot(vector4(t, 1.0f), m_lMatrix[indexA][0]);
-	float ty = glm::dot(vector4(t, 1.0f), m_lMatrix[indexA][2]);
-	float tz = glm::dot(vector4(t, 1.0f), m_lMatrix[indexA][2]);
-	t = vector3(tx, ty, tz);
-	//t *= static_cast<vector3>(vector4(t, 1.0f) * m_lMatrix[indexA]);
-	//compute subexpressions. Add in epsiolon to counteract
+
+	
+	//Take into account rounding errors
 	for(int i = 0; i < 3; i++) {
 		for(int j = 0; j < 3; j++) {
 			AbsR[i][j] = glm::abs(R[i][j]) + FLT_EPSILON;
 		}
 	}
 
-	//TEST AXES L = A0, L = A1, L = A2
-	for(int i = 0; i < 3; i++) {
-		radiusA = aR[i];
-		radiusB = bR[0] * AbsR[i][0] + bR[1] * AbsR[i][1] + bR[2] * AbsR[i][2];
-		if(abs(t[i]) > radiusA + radiusB) return false;
-	}
 
+	// Test axes L = A0, L = A1, L = A2
+	for (int i = 0; i < 3; i++) {
+		radiusA = aE[i];
+		radiusB = bE[0] * AbsR[i][0] + bE[1] * AbsR[i][1] + bE[2] * AbsR[i][2];
+		if (glm::abs(t[i]) > radiusA + radiusB) return 0;
+	}
 	// Test axes L = B0, L = B1, L = B2
 	for (int i = 0; i < 3; i++) {
-		radiusA = aR[0] * AbsR[0][i] + aR[1] * AbsR[1][i] + aR[2] * AbsR[2][i];
-		radiusB = bR[i];
-		if (abs(t[0] * R[0][i] + t[1] * R[1][i] + t[2] * R[2][i]) > radiusA + radiusB)
-			return false;
+		radiusA = aE[0] * AbsR[0][i] + aE[1] * AbsR[1][i] + aE[2] * AbsR[2][i];
+		radiusB = bE[i];
+		if (glm::abs(t[0] * R[0][i] + t[1] * R[1][i] + t[2] * R[2][i]) > radiusA + radiusB) return 0;
 	}
 
 	// Test axis L = A0 x B0
-	radiusA = aR[1] * AbsR[2][0] + aR[2] * AbsR[1][0];
-	radiusB = bR[1] * AbsR[0][2] + bR[2] * AbsR[0][1];
+	radiusA = aE[1] * AbsR[2][0] + aE[2] * AbsR[1][0];
+	radiusB = bE[1] * AbsR[0][2] + bE[2] * AbsR[0][1];
 	if (abs(t[2] * R[1][0] - t[1] * R[2][0]) > radiusA + radiusB) return false;
 
 	// Test axis L = A0 x B1
-	radiusA = aR[1] * AbsR[2][1] + aR[2] * AbsR[1][1];
-	radiusB = bR[0] * AbsR[0][2] + bR[2] * AbsR[0][0];
+	radiusA = aE[1] * AbsR[2][1] + aE[2] * AbsR[1][1];
+	radiusB = bE[0] * AbsR[0][2] + bE[2] * AbsR[0][0];
 	if (abs(t[2] * R[1][1] - t[1] * R[2][1]) > radiusA + radiusB) return false;
 
 	// Test axis L = A0 x B2
-	radiusA = aR[1] * AbsR[2][2] + aR[2] * AbsR[1][2];
-	radiusB = bR[0] * AbsR[0][1] + bR[1] * AbsR[0][0];
+	radiusA = aE[1] * AbsR[2][2] + aE[2] * AbsR[1][2];
+	radiusB = bE[0] * AbsR[0][1] + bE[1] * AbsR[0][0];
 	if (abs(t[2] * R[1][2] - t[1] * R[2][2]) > radiusA + radiusB) return false;
 
 	// Test axis L = A1 x B0
-	radiusA = aR[0] * AbsR[2][0] + aR[2] * AbsR[0][0];
-	radiusB = bR[1] * AbsR[1][2] + bR[2] * AbsR[1][1];
+	radiusA = aE[0] * AbsR[2][0] + aE[2] * AbsR[0][0];
+	radiusB = bE[1] * AbsR[1][2] + bE[2] * AbsR[1][1];
 	if (abs(t[0] * R[2][0] - t[2] * R[0][0]) > radiusA + radiusB) return false;
 
 	// Test axis L = A1 x B1
-	radiusA = aR[0] * AbsR[2][1] + aR[2] * AbsR[0][1];
-	radiusB = bR[0] * AbsR[1][2] + bR[2] * AbsR[1][0];
+	radiusA = aE[0] * AbsR[2][1] + aE[2] * AbsR[0][1];
+	radiusB = bE[0] * AbsR[1][2] + bE[2] * AbsR[1][0];
 	if (abs(t[0] * R[2][1] - t[2] * R[0][1]) > radiusA + radiusB) return false;
 
 	// Test axis L = A1 x B2
-	radiusA = aR[0] * AbsR[2][2] + aR[2] * AbsR[0][2];
-	radiusB = bR[0] * AbsR[1][1] + bR[1] * AbsR[1][0];
+	radiusA = aE[0] * AbsR[2][2] + aE[2] * AbsR[0][2];
+	radiusB = bE[0] * AbsR[1][1] + bE[1] * AbsR[1][0];
 	if (abs(t[0] * R[2][2] - t[2] * R[0][2]) > radiusA + radiusB) return false;
 	// Test axis L = A2 x B0
-	radiusA = aR[0] * AbsR[1][0] + aR[1] * AbsR[0][0];
-	radiusB = bR[1] * AbsR[2][2] + bR[2] * AbsR[2][1];
+	radiusA = aE[0] * AbsR[1][0] + aE[1] * AbsR[0][0];
+	radiusB = bE[1] * AbsR[2][2] + bE[2] * AbsR[2][1];
 	if (abs(t[1] * R[0][0] - t[0] * R[1][0]) > radiusA + radiusB) return false;
 	// Test axis L = A2 x B1
-	radiusA = aR[0] * AbsR[1][1] + aR[1] * AbsR[0][1];
-	radiusB = bR[0] * AbsR[2][2] + bR[2] * AbsR[2][0];
+	radiusA = aE[0] * AbsR[1][1] + aE[1] * AbsR[0][1];
+	radiusB = bE[0] * AbsR[2][2] + bE[2] * AbsR[2][0];
 	if (abs(t[1] * R[0][1] - t[0] * R[1][1]) > radiusA + radiusB) return false;
 	// Test axis L = A2 x B2
-	radiusA = aR[0] * AbsR[1][2] + aR[1] * AbsR[0][2];
-	radiusB = bR[0] * AbsR[2][1] + bR[1] * AbsR[2][0];
+	radiusA = aE[0] * AbsR[1][2] + aE[1] * AbsR[0][2];
+	radiusB = bE[0] * AbsR[2][1] + bE[1] * AbsR[2][0];
 	if (abs(t[1] * R[0][2] - t[0] * R[1][2]) > radiusA + radiusB) return false;
 
 	return true;
+
+#pragma endregion
+
 }

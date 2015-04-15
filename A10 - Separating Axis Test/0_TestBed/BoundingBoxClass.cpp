@@ -49,6 +49,7 @@ vector3 BoundingBoxClass::GetMaximumOBB(void){ return m_v3Max; }
 vector3 BoundingBoxClass::GetMinimumAABB(void){ return m_v3MinG; }
 vector3 BoundingBoxClass::GetMaximumAABB(void){ return m_v3MaxG; }
 vector3 BoundingBoxClass::GetCentroid(void){ return m_v3Centroid; }
+vector3 BoundingBoxClass::GetOBBSize(void){ return m_v3Size; }
 String BoundingBoxClass::GetName(void){return m_sName;}
 //Methods
 void BoundingBoxClass::GenerateOrientedBoundingBox(String a_sInstanceName)

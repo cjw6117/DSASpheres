@@ -69,6 +69,8 @@ public:
 	*/
 	vector3 GetCentroid(void);
 
+	vector3 GetOBBSize(void);
+
 	/*
 	GetName
 		Returns the name of the sphere to associate it with an instance
