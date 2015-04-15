@@ -19,3 +19,14 @@ By: Jarrett Way and Matt Guerette
 ###Contributions:
 
 Jarrett Way and Matt Guerrette - Edited BoundingBoxClass and BoundBoxManagerSingleton to mirror the demo.
+
+
+##Homework 10 - Separating Axis Test
+
+By: Jarrett Way and Matt Guerette
+
+
+###Contributions:
+
+Jarrett Way and Matt Guerrette - Followed the Realtime Collision Detection examples and
+implemented the Separating Axis Test together.
